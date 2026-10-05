@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import tempfile
 import time
 from pathlib import Path
 
@@ -22,7 +23,7 @@ from .spam import FloodTracker
 from .tg import safe
 
 log = logging.getLogger("bullshit.main")
-HEARTBEAT = Path(os.environ.get("HEARTBEAT_FILE", "/tmp/bullshit.heartbeat"))
+HEARTBEAT = Path(os.environ.get("HEARTBEAT_FILE") or Path(tempfile.gettempdir()) / "bullshit.heartbeat")
 GROUPS = (ChatType.GROUP, ChatType.SUPERGROUP)
 
 PUBLIC_COMMANDS = [
@@ -60,7 +61,10 @@ async def background(bot: Bot, rt: Runtime) -> None:
     tick = 0
     while True:
         try:
-            HEARTBEAT.write_text(str(int(time.time())))
+            try:
+                HEARTBEAT.write_text(str(int(time.time())))
+            except OSError:
+                pass  # health file is best-effort (e.g. no writable /tmp on Termux)
             await events.sweep_unverified(bot, rt)
             tick += 1
             if tick % 20 == 0:  # ~10 min
