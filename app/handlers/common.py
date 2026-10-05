@@ -54,6 +54,8 @@ async def cmd_about(message: Message, rt: Runtime) -> None:
 
 @router.message(Command("rules"))
 async def cmd_rules(message: Message, rt: Runtime) -> None:
+    if rt.settings.coexist_mode and message.chat.type in GROUPS:
+        return  # another bot owns /rules in the group
     if await _cooling(message, rt, "rules"):
         return
     await message.answer(await render_rules(rt))

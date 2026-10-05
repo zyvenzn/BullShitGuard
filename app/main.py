@@ -101,13 +101,20 @@ async def run() -> None:
     dp.message.outer_middleware(gate)
     dp.callback_query.outer_middleware(gate)
     dp.message.outer_middleware(GuardMiddleware())
-    for r in (common.router, admin.router, moderation.router, events.router, fun.router):
+    routers = [common.router, admin.router, events.router, fun.router]
+    if not settings.coexist_mode:  # in coexist mode another bot owns /ban /warn /mute ...
+        routers.insert(2, moderation.router)
+    for r in routers:
         dp.include_router(r)
 
-    await safe(lambda: bot.set_my_commands([BotCommand(command=c, description=d) for c, d in PUBLIC_COMMANDS],
+    public = [c for c in PUBLIC_COMMANDS if not (settings.coexist_mode and c[0] == "rules")]
+    await safe(lambda: bot.set_my_commands([BotCommand(command=c, description=d) for c, d in public],
                                            scope=BotCommandScopeDefault()), what="set_commands")
+    public = [c for c in PUBLIC_COMMANDS if not (settings.coexist_mode and c[0] == "rules")]
+    shared = {"warn", "warnings", "mute", "unmute", "ban", "unban", "kick", "purge", "lock", "unlock"}
+    admin_cmds = [c for c in ADMIN_COMMANDS if not (settings.coexist_mode and c[0] in shared)]
     await safe(lambda: bot.set_my_commands(
-        [BotCommand(command=c, description=d) for c, d in PUBLIC_COMMANDS + ADMIN_COMMANDS],
+        [BotCommand(command=c, description=d) for c, d in public + admin_cmds],
         scope=BotCommandScopeAllChatAdministrators()), what="set_admin_commands")
 
     if settings.group_id is None:

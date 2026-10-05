@@ -67,6 +67,11 @@ need no Telegram. See "Known gaps" below.
 **Owner only** (`OWNER_IDS`): `/setca <address|clear>` (validated, two-step confirm, logged) and
 `/setlinks <x|website|buy|telegram> <https-url|clear>`.
 
+## Running next to another bot (Rose, etc.)
+Two bots with the same commands both answer. Set `COEXIST_MODE=true` and this bot stops handling welcome,
+verification, `/rules`, `/ban /warn /mute /kick /purge /lock /unlock`; let the other bot own those. This bot keeps
+scam filtering, new-member link probation, flood control, `/ca /links /about /stats /announce` and fun replies.
+
 ## What it protects against
 - **Join verification:** new members are muted until they tap a button; kicked after `VERIFY_TIMEOUT_SECONDS`.
 - **Probation:** for `PROBATION_HOURS` new members can't post links, forwards or files.

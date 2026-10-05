@@ -48,6 +48,10 @@ async def on_join(event: ChatMemberUpdated, bot: Bot, rt: Runtime) -> None:
         await modactions.record(rt, bot, admin_id=None, target_id=user.id, action="impersonation_suspect",
                                 reason="name resembles an admin")
 
+    # Coexist mode: another bot (e.g. Rose) owns welcome/verification.
+    if rt.settings.coexist_mode:
+        return
+
     template = (await rt.db.get_setting("welcome")) or texts.WELCOME_DEFAULT
     text = texts.render_welcome(template, first_name=user.first_name, username=user.username,
                                 user_id=user.id, group_name=chat.title or "BULLSHIT")
@@ -112,5 +116,7 @@ async def sweep_unverified(bot: Bot, rt: Runtime) -> None:
 
 # Remove "X joined" / "X left" service messages to keep the chat clean.
 @router.message(F.chat.type.in_(GROUPS), F.new_chat_members | F.left_chat_member)
-async def drop_service(message: Message, bot: Bot) -> None:
+async def drop_service(message: Message, rt: Runtime) -> None:
+    if rt.settings.coexist_mode:
+        return
     await safe(lambda: message.delete(), what="delete-service")

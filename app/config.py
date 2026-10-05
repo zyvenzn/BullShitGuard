@@ -94,6 +94,7 @@ class Settings:
     buy_link: str
     telegram_link: str
     verify_enabled: bool
+    coexist_mode: bool
     link_allowlist: tuple[str, ...]
     flood_messages: int
     flood_seconds: int
@@ -163,6 +164,7 @@ class Settings:
             buy_link=buy,
             telegram_link=tg,
             verify_enabled=(env.get("VERIFY_ENABLED", "true").strip().lower() not in ("0", "false", "no", "off")),
+            coexist_mode=(env.get("COEXIST_MODE", "false").strip().lower() in ("1", "true", "yes", "on")),
             link_allowlist=allow,
             flood_messages=_int(env, "FLOOD_MESSAGES", 6),
             flood_seconds=_int(env, "FLOOD_SECONDS", 8),

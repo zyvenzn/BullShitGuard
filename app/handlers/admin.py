@@ -241,6 +241,8 @@ async def cmd_announce(message: Message, bot: Bot, rt: Runtime) -> None:
 # ------------------------------------------------------------------ lock / lockdown
 @router.message(Command("lock"))
 async def cmd_lock(message: Message, bot: Bot, rt: Runtime) -> None:
+    if rt.settings.coexist_mode:
+        return
     if not await require_admin(message, bot, rt) or message.chat.type not in GROUPS:
         return
     if not await rt.db.get_setting("prev_perms"):
@@ -258,6 +260,8 @@ async def cmd_lock(message: Message, bot: Bot, rt: Runtime) -> None:
 
 @router.message(Command("unlock"))
 async def cmd_unlock(message: Message, bot: Bot, rt: Runtime) -> None:
+    if rt.settings.coexist_mode:
+        return
     if not await require_admin(message, bot, rt) or message.chat.type not in GROUPS:
         return
     stored = await rt.db.get_setting("prev_perms")

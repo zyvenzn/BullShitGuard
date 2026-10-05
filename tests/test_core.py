@@ -42,6 +42,10 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(s.owner_ids, frozenset({1, 2}))
         self.assertNotIn("AAAA", repr(s))  # token never in repr
 
+    def test_coexist_mode_flag(self):
+        self.assertFalse(Settings.from_env(BASE_ENV).coexist_mode)
+        self.assertTrue(Settings.from_env({**BASE_ENV, "COEXIST_MODE": "true"}).coexist_mode)
+
     def test_missing_token(self):
         with self.assertRaises(ConfigError):
             Settings.from_env({"ADMIN_IDS": "1"})
